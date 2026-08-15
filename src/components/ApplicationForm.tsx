@@ -4,7 +4,7 @@ import { Button } from "./ui/Button";
 import { cn } from "../lib/utils";
 
 // Clave gratuita de Web3Forms: crear una en https://web3forms.com apuntando a info@aurafitnutrition.com
-const WEB3FORMS_ACCESS_KEY = "REPLACE_WITH_WEB3FORMS_ACCESS_KEY";
+const WEB3FORMS_ACCESS_KEY = "aafacec2-4507-43ab-a94c-9842b49e2d94";
 
 interface ApplicationFormProps {
   open: boolean;
