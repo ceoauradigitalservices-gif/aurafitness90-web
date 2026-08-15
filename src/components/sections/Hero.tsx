@@ -16,7 +16,7 @@ export function Hero({ onApply }: { onApply: () => void }) {
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 [background:radial-gradient(circle_at_50%_0%,rgba(204,255,0,0.08),transparent_60%)]" />
 
-      <AuraOrb className="pointer-events-none absolute left-1/2 top-1/2 -z-10 w-[440px] h-[680px] sm:w-[560px] sm:h-[840px] lg:w-[680px] lg:h-[980px] max-w-[95vw] max-h-[92vh] -translate-x-1/2 -translate-y-1/2 [mask-image:radial-gradient(ellipse_at_center,black_65%,transparent_98%)]" />
+      <AuraOrb className="pointer-events-none absolute left-1/2 top-1/2 -z-10 w-[440px] h-[680px] sm:w-[560px] sm:h-[840px] lg:w-[680px] lg:h-[980px] max-w-[95vw] max-h-[92vh] -translate-x-1/2 -translate-y-1/2 [mask-image:radial-gradient(ellipse_at_center,black_78%,transparent_100%)]" />
 
       {/* floating glass card — desktop only */}
       <motion.aside

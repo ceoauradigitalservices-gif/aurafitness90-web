@@ -156,7 +156,7 @@ function sampleSilhouette(draw: (ctx: CanvasRenderingContext2D) => void, count: 
     const py = (ys[idx] ?? cy) + (Math.random() - 0.5) * 1.2;
     positions[i * 3] = (px - cx) * SCALE;
     positions[i * 3 + 1] = -(py - cy) * SCALE;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 0.22;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 0.1;
   }
   return positions;
 }
@@ -211,8 +211,8 @@ export function AuraOrb({ className }: { className?: string }) {
       sampleSilhouette(drawAthleticProfile, COUNT, FIGURE_HEIGHT),
     ];
     const shapeColors = [
-      new THREE.Color("#6b7a1f"), // orb — dim neutral
-      new THREE.Color("#48540f"), // heavy — muted, low energy
+      new THREE.Color("#8fae1a"), // orb — visible neutral
+      new THREE.Color("#7a8f22"), // heavy — muted but clearly visible
       new THREE.Color("#ccff00"), // athletic — full brand energy
     ];
 
@@ -231,7 +231,7 @@ export function AuraOrb({ className }: { className?: string }) {
 
     const sprite = makeSprite();
     const material = new THREE.PointsMaterial({
-      size: isSmall ? 0.05 : 0.042,
+      size: isSmall ? 0.058 : 0.05,
       map: sprite,
       transparent: true,
       depthWrite: false,
@@ -299,7 +299,9 @@ export function AuraOrb({ className }: { className?: string }) {
         const idx0 = Math.floor(cyclePos);
         const idx1 = (idx0 + 1) % 3;
         const localT = cyclePos - idx0;
-        const eased = smoothstep(localT);
+        const HOLD = 0.62; // spend most of each segment holding a clear, readable shape
+        const eased =
+          localT < HOLD ? 0 : smoothstep((localT - HOLD) / (1 - HOLD));
 
         const shapeA = shapes[idx0];
         const shapeB = shapes[idx1];
@@ -314,7 +316,7 @@ export function AuraOrb({ className }: { className?: string }) {
           const by = shapeB[i * 3 + 1];
           const bz = shapeB[i * 3 + 2];
 
-          const wobble = Math.sin(t * 1.3 + i * 0.31) * 0.014;
+          const wobble = Math.sin(t * 1.3 + i * 0.31) * 0.006;
 
           posAttr.array[i * 3] = ax + (bx - ax) * eased + wobble;
           posAttr.array[i * 3 + 1] = ay + (by - ay) * eased + wobble * 0.6;
