@@ -281,7 +281,7 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#111111] border border-cardBorder rounded-2xl p-8 relative max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-lg bg-[#111111] border border-cardBorder rounded-2xl p-8 relative max-h-[90dvh] overflow-y-auto"
           >
             <button
               onClick={handleClose}
