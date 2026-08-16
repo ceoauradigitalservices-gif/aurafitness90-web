@@ -22,7 +22,15 @@ interface Values {
   children: "" | "yes" | "no";
   maritalStatus: "" | "single" | "married" | "divorced" | "other";
   employment: "" | "full" | "part" | "none";
+  motivation: "" | "low" | "medium" | "high";
+  smoking: "" | "no" | "occasional" | "yes";
+  substances: "" | "no" | "occasional" | "frequent";
+  eating: "" | "good" | "regular" | "bad";
+  support: "" | "yes" | "no" | "partial";
   cardio: "" | "yes" | "no";
+  injuries: "" | "yes" | "no";
+  injuriesDetail: string;
+  exerciseNow: "" | "none" | "sometimes" | "regular";
   allergies: string;
   budget: "" | "low" | "mid" | "high";
   goal: string;
@@ -37,13 +45,21 @@ const EMPTY_VALUES: Values = {
   children: "",
   maritalStatus: "",
   employment: "",
+  motivation: "",
+  smoking: "",
+  substances: "",
+  eating: "",
+  support: "",
   cardio: "",
+  injuries: "",
+  injuriesDetail: "",
+  exerciseNow: "",
   allergies: "",
   budget: "",
   goal: "",
 };
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 function ChoicePill({
   active,
@@ -120,7 +136,13 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
     if (step === 2 && (!values.children || !values.maritalStatus || !values.employment)) {
       return;
     }
-    if (step === 3 && !values.cardio) return;
+    if (
+      step === 3 &&
+      (!values.motivation || !values.smoking || !values.substances || !values.eating || !values.support)
+    ) {
+      return;
+    }
+    if (step === 4 && (!values.cardio || !values.injuries || !values.exerciseNow)) return;
     setStep((s) => s + 1);
   }
 
@@ -138,10 +160,16 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
       return;
     }
 
+    const highNeed =
+      values.motivation === "low" || values.substances === "frequent" || values.support === "no";
+
     setStatus("submitting");
     const fd = new FormData();
     fd.append("access_key", WEB3FORMS_ACCESS_KEY);
-    fd.append("subject", "Nueva aplicación · Aura Fitness 90");
+    fd.append(
+      "subject",
+      (highNeed ? "🔶 [Prioridad mentoría] " : "") + "Nueva aplicación · Aura Fitness 90"
+    );
     fd.append("to", "info@aurafitnutrition.com");
     fd.append("Nombre", values.name);
     fd.append("Email", values.email);
@@ -162,8 +190,50 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
       ] ?? ""
     );
     fd.append(
+      "Nivel de motivación actual",
+      { low: "Baja", medium: "Media", high: "Alta" }[values.motivation as "low" | "medium" | "high"] ?? ""
+    );
+    fd.append(
+      "Fuma",
+      { no: "No", occasional: "Ocasional", yes: "Sí" }[values.smoking as "no" | "occasional" | "yes"] ?? ""
+    );
+    fd.append(
+      "Consumo de alcohol / sustancias",
+      { no: "No consume", occasional: "Ocasional", frequent: "Frecuente" }[
+        values.substances as "no" | "occasional" | "frequent"
+      ] ?? ""
+    );
+    fd.append(
+      "Hábitos alimenticios",
+      { good: "Buenos", regular: "Regulares", bad: "Malos" }[values.eating as "good" | "regular" | "bad"] ?? ""
+    );
+    fd.append(
+      "Apoyo de su entorno",
+      { yes: "Sí tiene apoyo", no: "No tiene apoyo", partial: "Apoyo parcial" }[
+        values.support as "yes" | "no" | "partial"
+      ] ?? ""
+    );
+    if (highNeed) {
+      fd.append(
+        "Nota para Erick",
+        "🔶 Señales de alta necesidad de acompañamiento — buen candidato para atención/mentoría prioritaria, más allá de lo económico."
+      );
+    }
+    fd.append(
       "Cardiopatía / insuficiencia",
       values.cardio === "yes" ? "⚠️ SÍ — requiere revisión médica antes de iniciar" : "No"
+    );
+    fd.append(
+      "Lesiones o limitaciones físicas/motrices",
+      values.injuries === "yes"
+        ? `Sí — ${values.injuriesDetail || "sin detalle especificado"}`
+        : "No"
+    );
+    fd.append(
+      "¿Se ejercita actualmente?",
+      { none: "No, nada", sometimes: "A veces", regular: "Sí, regularmente" }[
+        values.exerciseNow as "none" | "sometimes" | "regular"
+      ] ?? ""
     );
     fd.append("Alergias", values.allergies || "Ninguna reportada");
     fd.append(
@@ -414,6 +484,136 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                     <>
                       <div>
                         <p className={labelClass}>
+                          ¿Cómo describirías tu nivel de motivación actual?
+                        </p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.motivation === "low"}
+                            onClick={() => set("motivation", "low")}
+                          >
+                            Baja
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.motivation === "medium"}
+                            onClick={() => set("motivation", "medium")}
+                          >
+                            Media
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.motivation === "high"}
+                            onClick={() => set("motivation", "high")}
+                          >
+                            Alta
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
+                        <p className={labelClass}>¿Fumas?</p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.smoking === "no"}
+                            onClick={() => set("smoking", "no")}
+                          >
+                            No
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.smoking === "occasional"}
+                            onClick={() => set("smoking", "occasional")}
+                          >
+                            Ocasional
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.smoking === "yes"}
+                            onClick={() => set("smoking", "yes")}
+                          >
+                            Sí
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
+                        <p className={labelClass}>
+                          ¿Consumes alcohol u otras sustancias con frecuencia?
+                        </p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.substances === "no"}
+                            onClick={() => set("substances", "no")}
+                          >
+                            No
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.substances === "occasional"}
+                            onClick={() => set("substances", "occasional")}
+                          >
+                            Ocasional
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.substances === "frequent"}
+                            onClick={() => set("substances", "frequent")}
+                          >
+                            Frecuente
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
+                        <p className={labelClass}>¿Cómo son tus hábitos alimenticios actuales?</p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.eating === "good"}
+                            onClick={() => set("eating", "good")}
+                          >
+                            Buenos
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.eating === "regular"}
+                            onClick={() => set("eating", "regular")}
+                          >
+                            Regulares
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.eating === "bad"}
+                            onClick={() => set("eating", "bad")}
+                          >
+                            Malos
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
+                        <p className={labelClass}>
+                          ¿Sientes que cuentas con apoyo de tu entorno para este cambio?
+                        </p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.support === "yes"}
+                            onClick={() => set("support", "yes")}
+                          >
+                            Sí
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.support === "partial"}
+                            onClick={() => set("support", "partial")}
+                          >
+                            Parcial
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.support === "no"}
+                            onClick={() => set("support", "no")}
+                          >
+                            No
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted leading-relaxed">
+                        No hay respuestas correctas o incorrectas — esto nos ayuda a saber
+                        cuánto acompañamiento necesitas realmente.
+                      </p>
+                    </>
+                  )}
+
+                  {step === 4 && (
+                    <>
+                      <div>
+                        <p className={labelClass}>
                           ¿Tienes alguna cardiopatía o insuficiencia diagnosticada?
                         </p>
                         <div className="flex gap-3">
@@ -438,6 +638,56 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                         )}
                       </div>
                       <div>
+                        <p className={labelClass}>
+                          ¿Tienes alguna lesión o limitación física/motriz?
+                        </p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.injuries === "no"}
+                            onClick={() => set("injuries", "no")}
+                          >
+                            No
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.injuries === "yes"}
+                            onClick={() => set("injuries", "yes")}
+                          >
+                            Sí
+                          </ChoicePill>
+                        </div>
+                        {values.injuries === "yes" && (
+                          <input
+                            placeholder="Cuéntanos brevemente cuál"
+                            className={cn(inputClass, "mt-2")}
+                            value={values.injuriesDetail}
+                            onChange={(e) => set("injuriesDetail", e.target.value)}
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <p className={labelClass}>¿Te ejercitas actualmente?</p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.exerciseNow === "none"}
+                            onClick={() => set("exerciseNow", "none")}
+                          >
+                            No, nada
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.exerciseNow === "sometimes"}
+                            onClick={() => set("exerciseNow", "sometimes")}
+                          >
+                            A veces
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.exerciseNow === "regular"}
+                            onClick={() => set("exerciseNow", "regular")}
+                          >
+                            Regularmente
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
                         <label className={labelClass} htmlFor="allergies">
                           ¿Alguna alergia relevante? (alimentos, medicamentos)
                         </label>
@@ -452,7 +702,7 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                     </>
                   )}
 
-                  {step === 4 && (
+                  {step === 5 && (
                     <>
                       <div>
                         <p className={labelClass}>
