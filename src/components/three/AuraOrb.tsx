@@ -179,9 +179,11 @@ function smoothstep(t: number) {
   return t * t * (3 - 2 * t);
 }
 
-export function AuraOrb({ className }: { className?: string }) {
+export function AuraOrb({ className, paused }: { className?: string; paused?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pausedRef = useRef(!!paused);
+  pausedRef.current = !!paused;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -191,8 +193,8 @@ export function AuraOrb({ className }: { className?: string }) {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isSmall = container.clientWidth < 640;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.5 : 2));
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isSmall, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1 : 2));
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
@@ -201,7 +203,7 @@ export function AuraOrb({ className }: { className?: string }) {
     const group = new THREE.Group();
     scene.add(group);
 
-    const COUNT = isSmall ? 4200 : 8000;
+    const COUNT = isSmall ? 1800 : 8000;
     const FIGURE_HEIGHT = 3.6;
     const ORB_RADIUS = 1.7;
 
@@ -275,10 +277,17 @@ export function AuraOrb({ className }: { className?: string }) {
     const clock = new THREE.Clock();
     let frameId = 0;
     let prevT = 0;
+    let frameCount = 0;
     const CYCLE_SECONDS = 9; // full orb -> heavy -> athletic -> orb loop at rest
 
     function animate() {
       frameId = requestAnimationFrame(animate);
+
+      if (pausedRef.current) return; // e.g. hidden behind the application modal — save CPU
+
+      frameCount++;
+      if (isSmall && frameCount % 2 !== 0) return; // halve the CPU-heavy work on mobile
+
       const t = clock.getElapsedTime();
       const dt = Math.min(t - prevT, 0.1);
       prevT = t;

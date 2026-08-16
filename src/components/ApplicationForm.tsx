@@ -113,15 +113,18 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
   const [step, setStep] = useState(1);
   const [values, setValues] = useState<Values>(EMPTY_VALUES);
   const [status, setStatus] = useState<Status>("idle");
+  const [stepError, setStepError] = useState("");
 
   function set<K extends keyof Values>(key: K, value: Values[K]) {
     setValues((v) => ({ ...v, [key]: value }));
+    setStepError("");
   }
 
   function reset() {
     setStep(1);
     setValues(EMPTY_VALUES);
     setStatus("idle");
+    setStepError("");
   }
 
   function handleClose() {
@@ -131,22 +134,30 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
 
   function goNext() {
     if (step === 1 && (!values.name || !values.email || !values.phone || !values.weight || !values.height)) {
+      setStepError("Completa todos los campos para continuar.");
       return;
     }
     if (step === 2 && (!values.children || !values.maritalStatus || !values.employment)) {
+      setStepError("Selecciona una opción en cada pregunta para continuar.");
       return;
     }
     if (
       step === 3 &&
       (!values.motivation || !values.smoking || !values.substances || !values.eating || !values.support)
     ) {
+      setStepError("Selecciona una opción en cada pregunta para continuar.");
       return;
     }
-    if (step === 4 && (!values.cardio || !values.injuries || !values.exerciseNow)) return;
+    if (step === 4 && (!values.cardio || !values.injuries || !values.exerciseNow)) {
+      setStepError("Selecciona una opción en cada pregunta para continuar.");
+      return;
+    }
+    setStepError("");
     setStep((s) => s + 1);
   }
 
   function goBack() {
+    setStepError("");
     setStep((s) => Math.max(1, s - 1));
   }
 
@@ -377,7 +388,7 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                           </label>
                           <input
                             id="weight"
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             required
                             className={inputClass}
@@ -391,7 +402,7 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                           </label>
                           <input
                             id="height"
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             required
                             className={inputClass}
@@ -743,6 +754,10 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                         />
                       </div>
                     </>
+                  )}
+
+                  {stepError && (
+                    <p className="text-sm text-red-400">{stepError}</p>
                   )}
 
                   <div className="flex gap-3 pt-2">

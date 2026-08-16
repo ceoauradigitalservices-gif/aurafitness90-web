@@ -20,7 +20,7 @@ function App() {
   return (
     <>
       <Nav onApply={openForm} />
-      <Hero onApply={openForm} />
+      <Hero onApply={openForm} formOpen={formOpen} />
       <Problem />
       <Coach onApply={openForm} />
       <Identity />
