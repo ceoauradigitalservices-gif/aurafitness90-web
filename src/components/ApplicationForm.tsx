@@ -19,6 +19,9 @@ interface Values {
   phone: string;
   weight: string;
   height: string;
+  children: "" | "yes" | "no";
+  maritalStatus: "" | "single" | "married" | "divorced" | "other";
+  employment: "" | "full" | "part" | "none";
   cardio: "" | "yes" | "no";
   allergies: string;
   budget: "" | "low" | "mid" | "high";
@@ -31,13 +34,16 @@ const EMPTY_VALUES: Values = {
   phone: "",
   weight: "",
   height: "",
+  children: "",
+  maritalStatus: "",
+  employment: "",
   cardio: "",
   allergies: "",
   budget: "",
   goal: "",
 };
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 function ChoicePill({
   active,
@@ -111,7 +117,10 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
     if (step === 1 && (!values.name || !values.email || !values.phone || !values.weight || !values.height)) {
       return;
     }
-    if (step === 2 && !values.cardio) return;
+    if (step === 2 && (!values.children || !values.maritalStatus || !values.employment)) {
+      return;
+    }
+    if (step === 3 && !values.cardio) return;
     setStep((s) => s + 1);
   }
 
@@ -139,6 +148,19 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
     fd.append("Teléfono", values.phone);
     fd.append("Peso (kg)", values.weight);
     fd.append("Altura (cm)", values.height);
+    fd.append("¿Tiene hijos?", values.children === "yes" ? "Sí" : "No");
+    fd.append(
+      "Estado civil",
+      { single: "Soltero/a", married: "Casado/a o en pareja", divorced: "Divorciado/a", other: "Otro" }[
+        values.maritalStatus as "single" | "married" | "divorced" | "other"
+      ] ?? ""
+    );
+    fd.append(
+      "Situación laboral",
+      { full: "Trabaja tiempo completo", part: "Trabaja medio tiempo", none: "No trabaja actualmente" }[
+        values.employment as "full" | "part" | "none"
+      ] ?? ""
+    );
     fd.append(
       "Cardiopatía / insuficiencia",
       values.cardio === "yes" ? "⚠️ SÍ — requiere revisión médica antes de iniciar" : "No"
@@ -314,6 +336,83 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                   {step === 2 && (
                     <>
                       <div>
+                        <p className={labelClass}>¿Tienes hijos?</p>
+                        <div className="flex gap-3">
+                          <ChoicePill
+                            active={values.children === "no"}
+                            onClick={() => set("children", "no")}
+                          >
+                            No
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.children === "yes"}
+                            onClick={() => set("children", "yes")}
+                          >
+                            Sí
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
+                        <p className={labelClass}>Estado civil</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <ChoicePill
+                            active={values.maritalStatus === "single"}
+                            onClick={() => set("maritalStatus", "single")}
+                          >
+                            Soltero/a
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.maritalStatus === "married"}
+                            onClick={() => set("maritalStatus", "married")}
+                          >
+                            Casado/a o en pareja
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.maritalStatus === "divorced"}
+                            onClick={() => set("maritalStatus", "divorced")}
+                          >
+                            Divorciado/a
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.maritalStatus === "other"}
+                            onClick={() => set("maritalStatus", "other")}
+                          >
+                            Otro
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <div>
+                        <p className={labelClass}>Situación laboral</p>
+                        <div className="flex flex-col gap-3">
+                          <ChoicePill
+                            active={values.employment === "full"}
+                            onClick={() => set("employment", "full")}
+                          >
+                            Trabajo tiempo completo
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.employment === "part"}
+                            onClick={() => set("employment", "part")}
+                          >
+                            Trabajo medio tiempo
+                          </ChoicePill>
+                          <ChoicePill
+                            active={values.employment === "none"}
+                            onClick={() => set("employment", "none")}
+                          >
+                            No trabajo actualmente
+                          </ChoicePill>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted leading-relaxed">
+                        Esto nos ayuda a adaptar tu plan a tu tiempo real disponible.
+                      </p>
+                    </>
+                  )}
+
+                  {step === 3 && (
+                    <>
+                      <div>
                         <p className={labelClass}>
                           ¿Tienes alguna cardiopatía o insuficiencia diagnosticada?
                         </p>
@@ -353,7 +452,7 @@ export function ApplicationForm({ open, onClose }: ApplicationFormProps) {
                     </>
                   )}
 
-                  {step === 3 && (
+                  {step === 4 && (
                     <>
                       <div>
                         <p className={labelClass}>
